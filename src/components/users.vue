@@ -10,10 +10,10 @@
         <el-row class="search">
             <el-col>
                 <!-- 搜索框 -->
-                 <el-input placeholder="请输入内容" v-model="query" class="searchinput">
-                        <el-button slot="append" icon="el-icon-search"></el-button>
+                 <el-input @clear="getAll()" clearable placeholder="请输入内容" v-model="query" class="searchinput">
+                        <el-button @click="searchUsers()" slot="append" icon="el-icon-search"></el-button>
                  </el-input>
-                 <el-button type="primary">添加用户</el-button>
+                 <el-button type="primary" @click.prevent="showAdd()">添加用户</el-button>
             </el-col>
         </el-row>
 
@@ -36,10 +36,55 @@
           {{list.row.create_time | fmtdate}}
           </template>
       </el-table-column>
-      <el-table-column prop="date" label="用户状态" width="120"></el-table-column>
-      <el-table-column prop="date" label="操作" width="180"></el-table-column>
+      <el-table-column label="用户状态" width="120">
+          <template slot-scope="list">    
+              <el-switch v-model="list.row.mg_state" active-color="#13ce66" inactive-color="#ff4949">
+
+              </el-switch>
+          </template>
+      </el-table-column>
+      <el-table-column prop="date" label="操作" width="180">
+          <template>
+              <el-button size="mini" type="primary" icon="el-icon-edit" circle plain></el-button>
+              <el-button size="mini" type="danger" icon="el-icon-delete" circle plain></el-button>
+              <el-button size="mini" type="success" icon="el-icon-check" circle plain></el-button>
+          </template>
+      </el-table-column>
     </el-table>
             <!-- 分页 -->
+            <div class="block">
+    <span class="demonstration">完整功能</span>
+    <el-pagination
+      @size-change="handleSizeChange"
+      @current-change="handleCurrentChange"
+      :current-page="pagenum"
+      :page-sizes="[2, 4, 6, 8]"
+      :page-size="2"
+      layout="total, sizes, prev, pager, next, jumper"
+      :total="total">
+    </el-pagination>
+  </div>
+  <!-- 对话框 -->
+  <el-dialog title="添加用户" :visible.sync="dialogFormVisible">
+  <el-form :label-position="labelPosition" label-width="80px" :model="formLabelAlign">
+  <el-form-item label="用户名">
+    <el-input v-model="formLabelAlign.username"></el-input>
+  </el-form-item>
+  <el-form-item label="密码">
+    <el-input v-model="formLabelAlign.password"></el-input>
+  </el-form-item>
+  <el-form-item label="邮箱">
+    <el-input v-model="formLabelAlign.email"></el-input>
+  </el-form-item>
+  <el-form-item label="密码">
+    <el-input v-model="formLabelAlign.mobile"></el-input>
+  </el-form-item>
+</el-form>
+  <div slot="footer" class="dialog-footer">
+    <el-button @click="dialogFormVisible = false">取 消</el-button>
+    <el-button type="primary" @click="dialogFormVisible = false">确 定</el-button>
+  </div>
+</el-dialog>
     </el-card>
 </template>
 
@@ -48,25 +93,60 @@ export default {
   data() {
     return {
       query: "",
-      pagenum:1,
-      pagesize:6,
-      list:[]
+      pagenum: 1,
+      pagesize: 2,
+      list: [],
+      total:'',
+      dialogFormVisible: false,
+      labelPosition: 'right',
+      formLabelAlign: {
+          username: '',
+          password: '',
+          email: '',
+          mobile:''
+        }
     };
   },
-  created(){
-      this.getTableData();
+  created() {
+    this.getTableData();
   },
-  methods:{
-      async getTableData(){
-        //设置发送请求头
-        const AUTH_TOKEN = localStorage.getItem('token')
-        this.$http.defaults.headers.common['Authorization'] = AUTH_TOKEN  
-        const res = await this.$http.get(`users?query=${this.query}&pagenum=${this.pagenum}&pagesize=${this.pagesize}`)
-        // console.log(res)
-        const {data:{data:{users},meta:{msg,status}}} = res
-        if(status === 200){
-            this.list = users
-        }
+  methods: {
+    async getTableData() {
+      //设置发送请求头
+      const AUTH_TOKEN = localStorage.getItem("token");
+      this.$http.defaults.headers.common["Authorization"] = AUTH_TOKEN;
+      const res = await this.$http.get(
+        `users?query=${this.query}&pagenum=${this.pagenum}&pagesize=${
+          this.pagesize
+        }`
+      );
+      // console.log(res)
+      const { data: { data: { users,total }, meta: { msg, status } } } = res;
+      if (status === 200) {
+        this.list = users; 
+        this.total = total
+      }
+    },
+     handleSizeChange(val) {
+        console.log(`每页 ${val} 条`);
+        this.pagesize = 1;
+        this.pagesize = val;
+        this.getTableData();
+      },
+      handleCurrentChange(val) {
+        console.log(`当前页: ${val}`);
+        this.pagenum = val;
+        this.getTableData();
+      },
+      searchUsers(){
+          this.pagenum = 1;
+          this.getTableData()
+      },
+      getAll(){
+          this.getTableData()
+      },
+      showAdd(){
+          this.dialogFormVisible = true
       }
   }
 };
