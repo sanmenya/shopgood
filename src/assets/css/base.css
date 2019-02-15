@@ -1,0 +1,9 @@
+html,body,h2 {
+    margin: 0;
+    padding: 0;
+    height: 100%;
+}
+a {
+    display: inline-block;
+    text-decoration: none;
+}
