@@ -18,7 +18,7 @@
           <i class="el-icon-location"></i>
           <span>用户管理</span>
         </template>
-          <el-menu-item index="1-1">
+          <el-menu-item index="users">
              <i class="el-icon-view"></i>
               用户列表
           </el-menu-item>
@@ -37,7 +37,7 @@
       </el-submenu>
 
         <!-- 商品管理 -->
-    
+
       <el-submenu index="3">
         <template slot="title">
           <i class="el-icon-location"></i>
@@ -46,7 +46,7 @@
           <el-menu-item index="3-1"><i class="el-icon-view"></i>商品列表</el-menu-item>
           <el-menu-item index="3-2"><i class="el-icon-view"></i>分类参数</el-menu-item>
           <el-menu-item index="3-3"><i class="el-icon-view"></i>商品分类</el-menu-item>
-      </el-submenu>  
+      </el-submenu>
 
        <!-- 订单管理 -->
       <el-submenu index="4">
@@ -70,10 +70,12 @@
         </el-menu-item-group>
       </el-submenu>
 
-    </el-menu>   
+    </el-menu>
             </el-aside>
             <el-container>
-            <el-main class="homemain">Main</el-main>
+            <el-main class="homemain">
+                <router-view></router-view>
+            </el-main>
         </el-container>
         </el-container>
         </el-container>
@@ -82,12 +84,12 @@
 
 <script>
 export default {
-  beforeMount(){
-      if(!localStorage.getItem('token')){
-          this.$router.push({
-              name:'Login'
-          })
-      }
+  beforeMount () {
+    if (!localStorage.getItem('token')) {
+      this.$router.push({
+        name: 'Login'
+      })
+    }
   },
   methods: {
     handleOpen (key, keyPath) {
@@ -96,13 +98,13 @@ export default {
     handleClose (key, keyPath) {
       console.log(key, keyPath)
     },
-    handleexit(){
+    handleexit () {
       localStorage.clear()
       this.$router.push({
-          name:'Login'
+        name: 'Login'
       })
       this.$message.warning('退出成功！')
-  }
+    }
   }
 }
 </script>
