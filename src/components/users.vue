@@ -3,9 +3,8 @@
         <!-- 面包屑 -->
         <el-breadcrumb separator="/">
             <el-breadcrumb-item :to="{ path: '/' }">首页</el-breadcrumb-item>
-            <el-breadcrumb-item><a href="/">活动管理</a></el-breadcrumb-item>
-            <el-breadcrumb-item>活动列表</el-breadcrumb-item>
-            <el-breadcrumb-item>活动详情</el-breadcrumb-item>
+            <el-breadcrumb-item>用户管理</el-breadcrumb-item>
+            <el-breadcrumb-item>用户列表</el-breadcrumb-item>
         </el-breadcrumb>
         <el-row class="search">
             <el-col>
@@ -37,17 +36,17 @@
           </template>
       </el-table-column>
       <el-table-column label="用户状态" width="120">
-          <template slot-scope="list">    
-              <el-switch v-model="list.row.mg_state" active-color="#13ce66" inactive-color="#ff4949">
+          <template slot-scope="list">
+              <el-switch @change="changeState(list.row)" v-model="list.row.mg_state" active-color="#13ce66" inactive-color="#ff4949">
 
               </el-switch>
           </template>
       </el-table-column>
       <el-table-column prop="date" label="操作" width="180">
-          <template>
-              <el-button size="mini" type="primary" icon="el-icon-edit" circle plain></el-button>
-              <el-button size="mini" type="danger" icon="el-icon-delete" circle plain></el-button>
-              <el-button size="mini" type="success" icon="el-icon-check" circle plain></el-button>
+          <template slot-scope="list">
+              <el-button @click="handleshowEdit(list.row)" size="mini" type="primary" icon="el-icon-edit" circle plain></el-button>
+              <el-button @click="handledelete(list.row.id)" size="mini" type="danger" icon="el-icon-delete" circle plain></el-button>
+              <el-button @click="handleshowallot(list.row)" size="mini" type="success" icon="el-icon-check" circle plain></el-button>
           </template>
       </el-table-column>
     </el-table>
@@ -64,25 +63,68 @@
       :total="total">
     </el-pagination>
   </div>
-  <!-- 对话框 -->
-  <el-dialog title="添加用户" :visible.sync="dialogFormVisible">
-  <el-form :label-position="labelPosition" label-width="80px" :model="formLabelAlign">
+  <!-- 添加对话框 -->
+  <el-dialog title="添加用户" :visible.sync="dialogFormVisibleAdd">
+  <el-form :label-position="labelPosition" label-width="80px" :model="formdata">
   <el-form-item label="用户名">
-    <el-input v-model="formLabelAlign.username"></el-input>
+    <el-input v-model="formdata.username"></el-input>
   </el-form-item>
   <el-form-item label="密码">
-    <el-input v-model="formLabelAlign.password"></el-input>
+    <el-input v-model="formdata.password"></el-input>
   </el-form-item>
   <el-form-item label="邮箱">
-    <el-input v-model="formLabelAlign.email"></el-input>
+    <el-input v-model="formdata.email"></el-input>
   </el-form-item>
   <el-form-item label="密码">
-    <el-input v-model="formLabelAlign.mobile"></el-input>
+    <el-input v-model="formdata.mobile"></el-input>
   </el-form-item>
 </el-form>
   <div slot="footer" class="dialog-footer">
-    <el-button @click="dialogFormVisible = false">取 消</el-button>
-    <el-button type="primary" @click="dialogFormVisible = false">确 定</el-button>
+    <el-button @click="dialogFormVisibleAdd = false">取 消</el-button>
+    <el-button type="primary" @click="dialogFormVisibleadd()">确 定</el-button>
+  </div>
+</el-dialog>
+
+<!-- 编辑对话框 -->
+    <el-dialog title="编辑用户" :visible.sync="dialogFormVisibleedit">
+  <el-form :label-position="labelPosition" label-width="80px" :model="formdata">
+  <el-form-item  label="用户名">
+    <el-input disabled v-model="formdata.username"></el-input>
+  </el-form-item>
+  <el-form-item label="邮箱">
+    <el-input v-model="formdata.email"></el-input>
+  </el-form-item>
+  <el-form-item label="电话">
+    <el-input v-model="formdata.mobile"></el-input>
+  </el-form-item>
+</el-form>
+  <div slot="footer" class="dialog-footer">
+    <el-button @click="dialogFormVisibleedit = false">取 消</el-button>
+    <el-button type="primary" @click="handleEdit()">确 定</el-button>
+  </div>
+</el-dialog>
+
+<!-- 分配角色对话框 -->
+<el-dialog title="分配角色" :visible.sync="dialogFormVisibleallot">
+  <el-form :label-position="labelPosition" label-width="80px" :model="formdata">
+  <el-form-item  label="用户名">
+    {{currentusers}}
+  </el-form-item>
+  <el-form-item  label="角色">
+      {{selectVal}}
+      <el-select v-model="selectVal" placeholder="请选择角色名称">
+         <el-option label="请选择" :value="-1" disabled>
+          </el-option>
+          <el-option v-for="(item,i) in roles" :key="i" :label="item.roleName" :value="item.id">
+
+          </el-option>
+      </el-select>
+  </el-form-item>
+  
+</el-form>
+  <div slot="footer" class="dialog-footer">
+    <el-button @click="dialogFormVisibleallot = false">取 消</el-button>
+    <el-button type="primary" @click="handleRevise()">确 定</el-button>
   </div>
 </el-dialog>
     </el-card>
@@ -90,66 +132,167 @@
 
 <script>
 export default {
-  data() {
+  data () {
     return {
-      query: "",
+      selectVal:-1,
+      roles:'[]',
+      currentusers:[],
+      query: '',
       pagenum: 1,
       pagesize: 2,
       list: [],
-      total:'',
-      dialogFormVisible: false,
+      total: -1,
+      dialogFormVisibleAdd: false,
+      dialogFormVisibleedit: false,
+      dialogFormVisibleallot: false,
       labelPosition: 'right',
-      formLabelAlign: {
-          username: '',
-          password: '',
-          email: '',
-          mobile:''
-        }
-    };
+      formdata: {
+        username: '',
+        password: '',
+        email: '',
+        mobile: '',
+      },
+        editID:'',
+        ReviseID:''
+    }
   },
-  created() {
-    this.getTableData();
+  created () {
+    this.getTableData()
   },
   methods: {
-    async getTableData() {
-      //设置发送请求头
-      const AUTH_TOKEN = localStorage.getItem("token");
-      this.$http.defaults.headers.common["Authorization"] = AUTH_TOKEN;
+    async getTableData () {
+      // 设置发送请求头
+      const AUTH_TOKEN = localStorage.getItem('token')
+      this.$http.defaults.headers.common['Authorization'] = AUTH_TOKEN
       const res = await this.$http.get(
         `users?query=${this.query}&pagenum=${this.pagenum}&pagesize=${
           this.pagesize
         }`
-      );
+      )
       // console.log(res)
-      const { data: { data: { users,total }, meta: { msg, status } } } = res;
+      const { data: { data: { users, total }, meta: { status } } } = res
       if (status === 200) {
-        this.list = users; 
+        this.list = users
         this.total = total
       }
     },
-     handleSizeChange(val) {
-        console.log(`每页 ${val} 条`);
-        this.pagesize = 1;
-        this.pagesize = val;
-        this.getTableData();
-      },
-      handleCurrentChange(val) {
-        console.log(`当前页: ${val}`);
-        this.pagenum = val;
-        this.getTableData();
-      },
-      searchUsers(){
-          this.pagenum = 1;
-          this.getTableData()
-      },
-      getAll(){
-          this.getTableData()
-      },
-      showAdd(){
-          this.dialogFormVisible = true
+    handleSizeChange (val) {
+      console.log(`每页 ${val} 条`)
+      this.pagesize = 1
+      this.pagesize = val
+      this.getTableData()
+    },
+    handleCurrentChange (val) {
+      console.log(`当前页: ${val}`)
+      this.pagenum = val
+      this.getTableData()
+    },
+    searchUsers () {
+      this.pagenum = 1
+      this.getTableData()
+    },
+    getAll () {
+      this.getTableData()
+    },
+    showAdd () {
+      this.formdata={}
+      this.dialogFormVisibleAdd = true
+    },
+    //删除单个表格中的数据
+     handledelete(ID){
+       this.$confirm('此操作将永久删除该文件, 是否继续?', '提示', {
+          confirmButtonText: '确定',
+          cancelButtonText: '取消',
+          type: 'warning'
+        }).then(async () => {
+          const res = await this.$http.delete(`users/${ID}`)
+          console.log(res)
+          const {data:{meta:{msg,status}}} = res
+          if(status===200){
+            this.pagenum=1
+            this.getTableData()
+            this.$message.success(msg)
+          } 
+        }).catch(() => {
+          this.$message.info('已取消删除')      
+        })
+    },
+    //添加用户
+    async dialogFormVisibleadd(){
+      const res = await this.$http.post(`users`,this.formdata)
+      // console.log(res)
+      this.dialogFormVisibleAdd = false
+      this.getTableData()
+    },
+    //显示编辑 更改信息
+    handleshowEdit(user){
+      this.formdata = user
+      this.editID = user.id
+      this.dialogFormVisibleedit = true
+
+    },
+    //更改编辑信息
+    async handleEdit(){
+      const res = await this.$http.put(`users/${this.editID}`,this.formdata)
+      if(res.data.meta.status===200){
+        this.dialogFormVisibleedit = false
+        this.getTableData()
+        this.$message.success(res.data.meta.msg)
       }
+    },
+    //修改用户状态
+    async changeState(user){
+      console.log(11)
+      const res = await this.$http.put(`users/${user.id}/state/${user.mg_state}`)
+      // console.log(res)
+      const {meta:{msg,status}} = res.data
+      if(status===200){
+        this.$message.success(msg)
+      }
+    },
+    //分配角色
+    async handleshowallot(user){
+      this.currentusers = user.username
+      this.dialogFormVisibleallot = true
+      //获取角色列表
+      const res = await this.$http.get(`roles`)
+      // console.log(res)
+      const {data,meta:{msg,status}} = res.data
+      // console.log(data)
+      if(status===200){
+        this.roles=data
+        // console.log(this.roles)
+        this.ReviseID=user.id
+      }
+      // 获取当前用户的角色id
+      const res2 = await this.$http.get(`users/${user.id}`)
+      console.log(res2)
+      // const {
+      //   meta: { msg2, status2 },
+      //   data2
+      // } = res2.data;
+      // if (status2 === 200) {
+
+      // 所有角色5个[每个角色有自己的id]
+      // 用户信息中也有rid 角色rid
+      //
+      this.selectVal = res2.data.data.rid;
+    },
+    //修改用户角色
+    async handleRevise(){
+      const res = await this.$http.put(`users/${this.ReviseID}/role`,{rid:this.selectVal})
+      // console.log(res);
+      const {
+        meta: { msg, status }
+      } = res.data;
+      if (status === 200) {
+        // 关闭对话框
+        this.dialogFormVisibleallot = false;
+        this.$message.success(msg);
+      }
+    }
   }
-};
+  }
 </script>
 
 <style>
