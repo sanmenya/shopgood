@@ -3,16 +3,17 @@
 import Vue from 'vue'
 import App from './App'
 import router from './router'
-import aixos from 'axios'
 import moment from 'moment'
-import cusBread from './components/cusbread.vue'//面包屑组建
+import cusBread from './components/cusbread.vue'// 面包屑组建
 // 引入公共的样式文件
 import './assets/css/base.css'
 import ElementUI from 'element-ui'
 import 'element-ui/lib/theme-chalk/index.css'
 
-aixos.defaults.baseURL = 'http://localhost:8888/api/private/v1/'
-Vue.prototype.$http = aixos
+// 使用自己开发的插件（axios 这只请求头的token）
+import httpServer from './components/http'
+Vue.use(httpServer)
+
 // 插件的使用 基于Vue
 Vue.use(ElementUI)
 
