@@ -1,11 +1,7 @@
 <template>
-    <el-card>
+    <el-card class="box">
         <!-- 面包屑 -->
-        <el-breadcrumb separator="/">
-            <el-breadcrumb-item :to="{ path: '/' }">首页</el-breadcrumb-item>
-            <el-breadcrumb-item>用户管理</el-breadcrumb-item>
-            <el-breadcrumb-item>用户列表</el-breadcrumb-item>
-        </el-breadcrumb>
+        <cus-bread level1="用户管理" level2="用户列表"></cus-bread>
         <el-row class="search">
             <el-col>
                 <!-- 搜索框 -->
@@ -296,6 +292,9 @@ export default {
 </script>
 
 <style>
+.box {
+  height: 100%;
+}
 .search {
   margin-top: 20px;
 }

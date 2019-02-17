@@ -5,6 +5,7 @@ import App from './App'
 import router from './router'
 import aixos from 'axios'
 import moment from 'moment'
+import cusBread from './components/cusbread.vue'//面包屑组建
 // 引入公共的样式文件
 import './assets/css/base.css'
 import ElementUI from 'element-ui'
@@ -21,6 +22,9 @@ Vue.config.productionTip = false
 Vue.filter('fmtdate', (v) => {
   return moment(v).format('YYYY-MM-DD')
 })
+
+// 全局使用面包屑组建
+Vue.component(cusBread.name, cusBread)
 /* eslint-disable no-new */
 new Vue({
   el: '#app',
