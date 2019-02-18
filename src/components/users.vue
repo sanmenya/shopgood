@@ -215,7 +215,7 @@ export default {
     },
     // 添加用户
     async dialogFormVisibleadd () {
-      const res = await this.$http.post(`users`, this.formdata)
+      await this.$http.post(`users`, this.formdata)
       // console.log(res)
       this.dialogFormVisibleAdd = false
       this.getTableData()
@@ -252,7 +252,7 @@ export default {
       // 获取角色列表
       const res = await this.$http.get(`roles`)
       // console.log(res)
-      const {data, meta: {msg, status}} = res.data
+      const {data, meta: {status}} = res.data
       // console.log(data)
       if (status === 200) {
         this.roles = data

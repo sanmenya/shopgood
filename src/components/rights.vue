@@ -30,14 +30,17 @@ export default {
   },
   methods: {
     async getTable () {
-    //   const AUTH_TOKEN = localStorage.getItem('token')
-    //   this.$http.defaults.headers.common['Authorization'] = AUTH_TOKEN
+      // const AUTH_TOKEN = localStorage.getItem('token')
+    //   console.log('1')
+      // this.$http.defaults.headers.common['Authorization'] = AUTH_TOKEN
       const res = await this.$http.get('rights/list')
       console.log(res)
       const {data, meta: {status}} = res.data
       if (status === 200) {
         this.list = data
       }
+
+    
     }
   }
 }

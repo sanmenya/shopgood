@@ -11,8 +11,8 @@ import ElementUI from 'element-ui'
 import 'element-ui/lib/theme-chalk/index.css'
 
 // 使用自己开发的插件（axios 这只请求头的token）
-import httpServer from './components/http'
-Vue.use(httpServer)
+import HttpServer from './components/http'
+Vue.use(HttpServer)
 
 // 插件的使用 基于Vue
 Vue.use(ElementUI)
