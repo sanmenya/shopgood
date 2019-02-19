@@ -116,8 +116,8 @@ export default {
     //侧边栏请求
     async SideMenus(){
       const res = await this.$http.get(`menus`)
-      console.log('菜单栏权限')   
-      console.log(res)
+      // console.log('菜单栏权限')   
+      // console.log(res)
       const {data,meta:{status}} = res.data
       if(status === 200){
         this.MenusData = data
