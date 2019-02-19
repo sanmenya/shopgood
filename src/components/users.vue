@@ -61,8 +61,8 @@
   </div>
   <!-- 添加对话框 -->
   <el-dialog title="添加用户" :visible.sync="dialogFormVisibleAdd">
-  <el-form :label-position="labelPosition" label-width="80px" :model="formdata">
-  <el-form-item label="用户名">
+  <el-form :label-position="labelPosition" label-width="80px" :model="formdata" :rules="rules" ref="formdata">
+  <el-form-item label="用户名" prop="username">
     <el-input v-model="formdata.username"></el-input>
   </el-form-item>
   <el-form-item label="密码">
@@ -148,8 +148,17 @@ export default {
         email: '',
         mobile: ''
       },
+       ruleForm: {
+          uname: ''
+        },
       editID: '',
-      ReviseID: ''
+      ReviseID: '',
+      rules:{
+        username:[
+          { required: true, message: '请输入正确的用户名', trigger: 'blur' },
+            { min: 3, max: 5, message: '长度在 3 到 5 个字符', trigger: 'blur' }
+        ]
+      }
     }
   },
   created () {
@@ -285,9 +294,24 @@ export default {
         this.dialogFormVisibleallot = false
         this.$message.success(msg)
       }
+    },
+    // 表单验证
+    submitForm(formName) {
+        this.$refs[formName].validate((valid) => {
+          if (valid) {
+            alert('submit!');
+          } else {
+            console.log('error submit!!')
+            return false;
+          }
+        });
+      },
+      resetForm(formName) {
+        this.$refs[formName].resetFields()
+      }
     }
   }
-}
+
 </script>
 
 <style>

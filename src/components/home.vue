@@ -13,19 +13,19 @@
                 <!-- 侧边栏 -->
                 <!-- 用户管理 -->
     <el-menu default-active="1" @open="handleOpen" @close="handleClose" :unique-opened="true" :router="true">
-      <el-submenu index="1">
+      <el-submenu :index="item.id+''" v-for="(item,i) in MenusData" :key="i">
         <template slot="title">
           <i class="el-icon-location"></i>
-          <span>用户管理</span>
+          <span>{{item.authName}}</span>
         </template>
-          <el-menu-item index="users">
+          <el-menu-item :index="item1.path" v-for="(item1,i1) in item.children" :key="i1">
              <i class="el-icon-view"></i>
-              用户列表
+              {{item1.authName}}
           </el-menu-item>
       </el-submenu>
 
       <!-- 权限管理 -->
-      <el-submenu index="2">
+      <!-- <el-submenu index="2">
         <template slot="title">
           <i class="el-icon-location"></i>
           <span>权限管理</span>
@@ -34,11 +34,11 @@
           <el-menu-item index="role"><i class="el-icon-view"></i>角色列表</el-menu-item>
           <el-menu-item index="rights"><i class="el-icon-view"></i>权限列表</el-menu-item>
         </el-menu-item-group>
-      </el-submenu>
+      </el-submenu> -->
 
         <!-- 商品管理 -->
 
-      <el-submenu index="3">
+      <!-- <el-submenu index="3">
         <template slot="title">
           <i class="el-icon-location"></i>
           <span>商品管理</span>
@@ -46,10 +46,10 @@
           <el-menu-item index="3-1"><i class="el-icon-view"></i>商品列表</el-menu-item>
           <el-menu-item index="3-2"><i class="el-icon-view"></i>分类参数</el-menu-item>
           <el-menu-item index="3-3"><i class="el-icon-view"></i>商品分类</el-menu-item>
-      </el-submenu>
+      </el-submenu> -->
 
        <!-- 订单管理 -->
-      <el-submenu index="4">
+      <!-- <el-submenu index="4">
         <template slot="title">
           <i class="el-icon-location"></i>
           <span>订单管理</span>
@@ -57,10 +57,10 @@
         <el-menu-item-group>
           <el-menu-item index="4-1"><i class="el-icon-view"></i>订单列表</el-menu-item>
         </el-menu-item-group>
-      </el-submenu>
+      </el-submenu> -->
 
          <!-- 数据统计 -->
-      <el-submenu index="5">
+      <!-- <el-submenu index="5">
         <template slot="title">
           <i class="el-icon-location"></i>
           <span>数据统计</span>
@@ -68,7 +68,7 @@
         <el-menu-item-group>
           <el-menu-item index="5-1"><i class="el-icon-view"></i>数据报表</el-menu-item>
         </el-menu-item-group>
-      </el-submenu>
+      </el-submenu> -->
 
     </el-menu>
             </el-aside>
@@ -84,12 +84,20 @@
 
 <script>
 export default {
+  data (){
+    return{
+      MenusData:[]
+    }
+  },
   beforeMount () {
     if (!localStorage.getItem('token')) {
       this.$router.push({
         name: 'Login'
       })
     }
+  },
+  created(){
+    this.SideMenus()
   },
   methods: {
     handleOpen (key, keyPath) {
@@ -104,6 +112,16 @@ export default {
         name: 'Login'
       })
       this.$message.warning('退出成功！')
+    },
+    //侧边栏请求
+    async SideMenus(){
+      const res = await this.$http.get(`menus`)
+      console.log('菜单栏权限')   
+      console.log(res)
+      const {data,meta:{status}} = res.data
+      if(status === 200){
+        this.MenusData = data
+      }
     }
   }
 }
