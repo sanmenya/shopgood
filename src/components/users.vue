@@ -165,7 +165,7 @@ export default {
     this.getTableData()
   },
   methods: {
-    async getTableData () {
+    async getTableData() {
       // 设置发送请求头
       // const AUTH_TOKEN = localStorage.getItem('token')
       // this.$http.defaults.headers.common['Authorization'] = AUTH_TOKEN

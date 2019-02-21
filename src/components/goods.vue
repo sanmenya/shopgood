@@ -53,9 +53,9 @@ export default {
             query:'',
             list:[],
             pagenum:1,
-            total:1000,
+            total:-1,
             pagenum:1,
-            pagesize:50
+            pagesize:10
         }
     },
     created(){
@@ -64,21 +64,25 @@ export default {
     methods:{
         handleSizeChange(val) {
         console.log(`每页 ${val} 条`);
+        this.pagesize = val
+        this.LodingList()
       },
       handleCurrentChange(val) {
         console.log(`当前页: ${val}`);
+        this.pagenum = val
+        this.LodingList()
       },
+
         searchUsers(){},
         // 加载商品列表
         async LodingList(){
             const res = await this.$http.get(`goods?query=${this.query}&pagenum=${this.pagenum}&pagesize=${this.pagesize}`)
             // console.log('获取商品信息')
-            console.log(res)
+            // console.log(res)
             const {data,meta:{status}} = res.data
             if(status === 200){
                 this.list = data.goods
                 this.total = data.total 
-                this.pagesize = data.total
                 }    
         }
     }

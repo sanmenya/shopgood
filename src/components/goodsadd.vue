@@ -42,9 +42,9 @@
     </el-tab-pane>
     <el-tab-pane label="商品参数" name="2">
         <el-form-item :label="item1.attr_name" v-for="(item1,i) in arrDy" :key="i">
-            <!-- {{checkList}} -->
-        <el-checkbox-group v-model="checkList">
-    <el-checkbox :label="item2" v-for="(item2,i) in item1.attr_vals" :key="i"></el-checkbox>
+            {{item1.attr_vals}}
+        <el-checkbox-group v-model="item1.attr_vals">
+    <el-checkbox border :label="item2" v-for="(item2,i) in item1.attr_vals" :key="i"></el-checkbox>
 
   </el-checkbox-group>
   </el-form-item>
@@ -54,120 +54,192 @@
             <el-input v-model="item.attr_vals"></el-input>
           </el-form-item>
     </el-tab-pane>
-    <el-tab-pane label="商品图片" name="4"></el-tab-pane>
-    <el-tab-pane label="商品内容" name="5"></el-tab-pane>
+    <el-tab-pane label="商品图片" name="4">
+        <!-- 图片上传 -->
+        <el-form-item label="添加图片">
+        <el-upload
+        :headers="headers"
+  action="http://localhost:8888/api/private/v1/upload"
+  :on-remove="handleRemove"
+  :on-success="handleSuccess"
+  list-type="picture">
+  <el-button size="small" type="primary">点击上传</el-button>
+  <!-- <div slot="tip" class="el-upload__tip">只能上传jpg/png文件，且不超过500kb</div> -->
+</el-upload>
+</el-form-item>
+    </el-tab-pane>
+    <el-tab-pane label="商品内容" name="5">
+      <el-form-item>
+        <el-button type="success" @click="addGoods()">添加商品</el-button>
+        <quill-Editor v-model="formLabelAlign.goods_introduce" class="editor"></quill-Editor> 
+      </el-form-item>
+    </el-tab-pane>
   </el-tabs>
   </el-form>
     </el-card>
 </template>
 
 <script>
+import "quill/dist/quill.core.css";
+import "quill/dist/quill.snow.css";
+import "quill/dist/quill.bubble.css";
+import { quillEditor } from "vue-quill-editor";
 export default {
-    data(){
-        return{
-            active:'1',
-            formLabelAlign:{
-                goods_name:'',
-                goods_cat:'',
-                goods_price:'',
-                goods_number:'',
-                goods_weight:'',
-                goods_introduce:'',
-                pics:{},
-                attrs:[]
-            },
-            arrDy:[],
-            arrStatic:[],
-            options:[],
-            selectedOptions: [],
-            checkList:[],
-            defaultProp:{
-                value:'cat_id',
-                label:'cat_name',
-                children:'children'
-            }
-        }
-    },
-    created(){
-        this.getGoodsCate()
-    },
-    methods:{
-          handleChange(value) {
-        console.log(value);
+  components: {
+    quillEditor
+  },
+  data() {
+    return {
+      headers: {
+        Authorization: localStorage.getItem("token")
       },
-     async changeTab(){
-         if(this.active==='2' || this.active === "3"){
-             if(this.selectedOptions.length!==3){
-                 this.$message.error('请先选择三级分类!')
-                 return 
-             }
-             if(this.active === "2"){
-                 const res = await this.$http.get(
+      active: "1",
+      formLabelAlign: {
+        goods_name: "",
+        goods_cat: "",
+        goods_price: "",
+        goods_number: "",
+        goods_weight: "",
+        goods_introduce: "",
+        pics: [],
+        attrs: []
+      },
+      arrDy: [],
+      arrStatic: [],
+      options: [],
+      selectedOptions: [],
+      // checkList:[],
+      defaultProp: {
+        value: "cat_id",
+        label: "cat_name",
+        children: "children"
+      }
+    };
+  },
+  created() {
+    this.getGoodsCate();
+  },
+  methods: {
+    handleChange(value) {
+      console.log(value);
+    },
+    async changeTab() {
+      if (this.active === "2" || this.active === "3") {
+        if (this.selectedOptions.length !== 3) {
+          this.$message.error("请先选择三级分类!");
+          this.arrDy = [];
+          this.arrStatic = [];
+          return;
+        }
+        if (this.active === "2") {
+          const res = await this.$http.get(
             `categories/${this.selectedOptions[2]}/attributes?sel=many`
-          )
+          );
           // console.log(res);
-          const {
-            meta: { msg, status },
-            data
-          } = res.data
+          const { meta: { msg, status }, data } = res.data;
           if (status === 200) {
             this.arrDy = data;
             this.arrDy.forEach(item => {
-            //   item.attr_vals = item.attr_vals.trim().split(",")
-           item.attr_vals = item.attr_vals.trim().length===0 ?[]:item.attr_vals.trim().split(",")
-            })
-            // console.log(this.arrDy)
+              //   item.attr_vals = item.attr_vals.trim().split(",")
+              item.attr_vals =
+                item.attr_vals.trim().length === 0
+                  ? []
+                  : item.attr_vals.trim().split(",");
+            });
+            console.log("动态数据----");
+            console.log(this.arrDy);
           }
-             }
-             if(this.active === "3"){
-                 // 获取静态数据
+        }
+        if (this.active === "3") {
+          // 获取静态数据
           const res = await this.$http.get(
             `categories/${this.selectedOptions[2]}/attributes?sel=only`
-          )
-          // console.log(res);
-          const {
-            meta: { msg, status },
-            data
-          } = res.data;
+          );
+          console.log(res);
+          const { meta: { msg, status }, data } = res.data;
           if (status === 200) {
             this.arrStatic = data;
-            console.log("静态数据----")
-            console.log(this.arrStatic)
+            // console.log("静态数据----")
+            // console.log(this.arrStatic)
           }
-             }
-         }
-          
-      },
-      // 获取三级分类的数据
-      async getGoodsCate(){
-          const res = await this.$http.get(`categories?type=3`)
-          console.log(res)
-          const {data,meta:{status}} = res.data
+        }
+      }
+    },
+    // 获取三级分类的数据
+    async getGoodsCate() {
+      const res = await this.$http.get(`categories?type=3`);
+      //   console.log(res)
+      const { data, meta: { status } } = res.data;
 
       if (status === 200) {
         this.options = data;
         // console.log(this.options);
       }
-      } 
+    },
+    // 图片上传
+    handleRemove(file, fileList) {
+      console.log("handleRemove");
+      console.log(file);
+      const Index1 = this.formLabelAlign.pics.findIndex(item => {
+        return item.pic === file.response.data.tmp_path;
+      });
+      // console.log(typeof(Index1));
+      // console.log(Index1);
+      // console.log(Index1);
+      this.formLabelAlign.pics.splice(Index1, 1);
+    },
+    async handleSuccess(response, file, fileList) {
+      // console.log("Success");
+      // console.log(response);
+      this.formLabelAlign.pics.push({ pic: response.data.tmp_path });
+    },
+    async addGoods() {
+      this.formLabelAlign.goods_cat = this.selectedOptions.join(",");
+      const arr1 = this.arrDy.map(item => {
+        return { attr_id: item.attr_id, attr_value: item.attr_vals };
+      });
+      const arr2 = this.arrStatic.map(item => {
+        return { attr_id: item.attr_id, attr_value: item.attr_vals };
+      });
+      this.formLabelAlign.attrs = [...arr1, ...arr2];
+      const res = await this.$http.post(`goods`, this.formLabelAlign);
+      console.log(res);
+      const {
+        meta: { msg, status }
+      } = res.data;
+      if (status === 201) {
+        // 列表
+        this.$router.push({
+          name: "Goods"
+        });
+      } else {
+        this.$message.error(msg);
+      }
     }
-}
+  }
+};
 </script>
 
 <style>
-.box{
-    height: 100%;
+.box {
+  height: 100%;
 }
-.alert{
-    margin-top: 20px;
+.alert {
+  margin-top: 20px;
 }
-.steps{
-    margin-top: 20px;
+.steps {
+  margin-top: 20px;
 }
-.form1{
-    height: 500px;
-    overflow: auto;
+.form1 {
+  height: 500px;
+  overflow: auto;
 }
-.inpunt{
-    width: 200px;
+.inpunt {
+  width: 200px;
+}
+.ql-container,
+.ql-snow {
+  /* height: 400px; */
+  min-height: 200px;
 }
 </style>
