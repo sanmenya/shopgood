@@ -8,6 +8,7 @@ import Role from '@/components/role.vue'
 import Goods from '@/components/goods.vue'
 import Goodsadd from '@/components/goodsadd.vue'
 import Params from '@/components/params.vue'
+import Categories from '@/components/categories.vue'
 Vue.use(Router)
 
 export default new Router({
@@ -55,6 +56,11 @@ export default new Router({
           path: '/params',
           name: 'Params',
           component: Params
+        },
+        {
+          path: '/categories',
+          name: 'Categories',
+          component: Categories
         }
       ]
     }

@@ -19,7 +19,7 @@
         <!-- tabs -->
     <el-tabs v-model="active" @tab-click="handleClick">
         <el-tab-pane label="动态参数" name="1">
-           <el-button type="success" disabled class="tag" center>设置动态参数</el-button>
+           <el-button type="success" disabled class="tag" center>11设置动态参数</el-button>
     <el-table :data="arrDy" style="width: 100%" height="500">
         <!-- 展开项 -->
         <el-table-column type="expand">
