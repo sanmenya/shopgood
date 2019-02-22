@@ -58,6 +58,7 @@
     </el-table>
         </el-tab-pane>
         <el-tab-pane label="静态参数" name="2">静态参数
+          <el-button type="success" disabled class="tag" center>设置静态参数</el-button>
           <el-table :data="arrState" style="width: 100%" height="500">
               <el-table-column type="index" label="#" width="230">
             </el-table-column>
