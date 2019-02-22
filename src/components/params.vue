@@ -58,8 +58,20 @@
     </el-table>
         </el-tab-pane>
         <el-tab-pane label="静态参数" name="2">静态参数
-
-
+          <el-table :data="arrState" style="width: 100%" height="500">
+              <el-table-column type="index" label="#" width="230">
+            </el-table-column>
+            <el-table-column prop="attr_name" label="属性名称" width="230">
+            </el-table-column>
+            <el-table-column prop="attr_vals" label="属性值" width="230">
+            </el-table-column>
+            <el-table-column prop="address" label="操作" width="255">
+                <template slot-scope="scope">
+                    <el-button type="primary" icon="el-icon-edit" circle></el-button>    
+                    <el-button type="danger" icon="el-icon-delete" circle></el-button>    
+                </template>    
+            </el-table-column>
+          </el-table>
         </el-tab-pane>
     </el-tabs>
     </el-card>
@@ -78,6 +90,7 @@ export default {
         children: "children"
       },
       arrDy: [],
+      arrState:[],
       inputVisible: false,
       inputValue: ""
     };
@@ -123,6 +136,16 @@ export default {
           console.log("动态数据----");
           console.log(this.arrDy);
         }
+      };
+       if(this.active === "2"){
+        // 获取静态参数
+        const res = await this.$http.get(`categories/${this.selectedOptions[2]}/attributes?sel=only`)
+        console.log(1111)
+        console.log(res)
+        const {data,meta:{status}} = res.data
+        if(status===200){
+          this.arrState = data
+        }
       }
     },
     async handleClick() {
@@ -145,12 +168,33 @@ export default {
           console.log("动态数据----");
           console.log(this.arrDy);
         }
+      };
+      if(this.active === "2"){
+        // 获取静态参数
+        const res = await this.$http.get(`categories/${this.selectedOptions[2]}/attributes?sel=only`)
+        console.log(1111)
+        console.log(res)
+        const {data,meta:{status}} = res.data
+        if(status===200){
+          this.arrState = data
+        }
       }
     },
     // tag
-    handleClose(item, attr) {
+    async handleClose(item, attr) {
       //   this.dynamicTags.splice(this.dynamicTags.indexOf(attr), 1);
       item.attr_vals.splice(item.attr_vals.indexOf(attr), 1);
+      // console.log(11111)
+      // console.log(item.attr_vals)
+      // console.log(item.attr_vals.join(','))
+      // 移除Tag
+    const res = await this.$http.put(`categories/${this.selectedOptions[2]}/attributes/${item.attr_id}`,{
+      attr_name: item.attr_name,
+      attr_sel: "many",
+      attr_vals: item.attr_vals.join(",")
+    })
+  //  console.log('tag')
+  //  console.log(res)
     },
     showInput() {
       this.inputVisible = true;
@@ -159,13 +203,21 @@ export default {
       });
     },
 
-    handleInputConfirm(item) {
+    async handleInputConfirm(item) {
       let inputValue = this.inputValue;
       if (inputValue) {
         item.attr_vals.push(inputValue);
       }
+      // console.log(111)
+      // console.log(item)
       this.inputVisible = false;
       this.inputValue = "";
+      //添加
+      const res=await this.$http.put(`categories/${this.selectedOptions[2]}/attributes/${item.attr_id}`,{
+          attr_name:item.attr_name,
+          attr_sel:'many',
+          attr_vals:item.attr_vals.join(',')
+      })
     }
   }
 };
